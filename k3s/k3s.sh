@@ -4,11 +4,14 @@ terraform output private_key > private.pem
 chmod 600 private.pem
 
 
-export K3S_MASTER=`terraform output k3s_master_public_dns`
+#export K3S_MASTER=`terraform output k3s_master_public_dns`
+export K3S_MASTER=`terraform output k3s_master_public_ip`
 echo $K3S_MASTER
 
+#ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
+#  "curl -sfL https://get.k3s.io | sh -"
 ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
-  "curl -sfL https://get.k3s.io | sh -"
+  "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"server --no-deploy traefik --node-external-ip $K3S_MASTER\" sh -s -"
 
 
 # token
@@ -37,9 +40,10 @@ ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
 
 
 # kubeconfig
+export K3S_MASTER=`terraform output k3s_master_public_dns`
 ssh -i private.pem ubuntu@$K3S_MASTER sudo cat /etc/rancher/k3s/k3s.yaml > kubeconfig.yaml
 yq w --inplace kubeconfig.yaml clusters[0].cluster.server https://$K3S_MASTER:6443
 
 export KUBECONFIG=`pwd`/kubeconfig.yaml
-kubectl get nodes
+kubectl get nodes -o wide
 kubectl get pods -A
