@@ -32,3 +32,10 @@ ssh -i private.pem ubuntu@$K3S_NODE1
 
 terraform destroy
 ```
+
+https://github.com/alexellis/k3sup
+
+```
+curl -sLS https://get.k3sup.dev | sh
+sudo install k3sup /usr/local/bin/
+```
