@@ -18,3 +18,11 @@ terraform apply
 ```
 
 http://dashboard.k3s-david.sda-dev-projects.nl/
+
+```
+terraform output private_key > private.pem
+chmod 600 private.pem
+export HOST=`terraform output inlets_public_dns`
+echo $HOST
+ssh -i private.pem ec2-user@$HOST
+```

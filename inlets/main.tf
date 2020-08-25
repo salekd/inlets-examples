@@ -89,7 +89,7 @@ resource "aws_route_table_association" "public1_assoc" {
 
 resource "aws_route_table_association" "private1_assoc" {
   subnet_id      = aws_subnet.private1.id
-  route_table_id = aws_route_table.public.id
+  route_table_id = aws_default_route_table.private.id
 }
 
 
