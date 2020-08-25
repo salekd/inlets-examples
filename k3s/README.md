@@ -1,14 +1,20 @@
 # K3s
 
+Deploy the infrastructure for the K3s cluster:
+
 ```
 terraform init
 terraform plan
 terraform apply
+```
 
+Use the `k3s.sh` or `k3sup.sh` scripts to deploy the cluster.
+
+```
 terraform output private_key > private.pem
 chmod 600 private.pem
 
-
+# Master node
 export K3S_MASTER=`terraform output k3s_master_public_dns`
 echo $K3S_MASTER
 ssh -i private.pem ubuntu@$K3S_MASTER
@@ -24,7 +30,7 @@ sudo cat /var/lib/rancher/k3s/server/node-token
 # kubeconfig
 sudo cat /etc/rancher/k3s/k3s.yaml
 
-
+# Worker node
 export K3S_NODE1=`terraform output k3s_node1_public_dns`
 echo $K3S_NODE1
 ssh -i private.pem ubuntu@$K3S_NODE1

@@ -36,8 +36,27 @@ kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboar
 kubectl proxy
 
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login
+```
 
-
-arkade install cert-manager
+```
+#arkade install cert-manager
 arkade install ingress-nginx
+```
+
+```
+arkade install inlets-operator --provider ec2 --region eu-central-1 --secret-key-file aws_secret_access_key --token-file aws_access_key_id
+
+kubectl apply -f \
+  https://raw.githubusercontent.com/inlets/inlets-operator/master/contrib/nginx-sample-deployment.yaml
+
+kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
+kubectl get svc
+
+kubectl get tunnel/nginx-1-tunnel -o yaml
+kubectl logs deploy/nginx-1-tunnel-client
+
+# When you're done, remove the tunnel by deleting the service
+kubectl delete svc/nginx-1
+
+kubectl logs deploy/inlets-operator -f
 ```

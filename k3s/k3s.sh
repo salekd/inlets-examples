@@ -4,14 +4,15 @@ terraform output private_key > private.pem
 chmod 600 private.pem
 
 
-#export K3S_MASTER=`terraform output k3s_master_public_dns`
-export K3S_MASTER=`terraform output k3s_master_public_ip`
+export K3S_MASTER=`terraform output k3s_master_public_dns`
 echo $K3S_MASTER
 
-#ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
-#  "curl -sfL https://get.k3s.io | sh -"
 ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
-  "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"server --no-deploy traefik --node-external-ip $K3S_MASTER\" sh -s -"
+  "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"server --no-deploy traefik\" sh -s -"
+#  "curl -sfL https://get.k3s.io | sh -"
+#export K3S_MASTER=`terraform output k3s_master_public_ip`
+#ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
+#  "curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC=\"server --no-deploy traefik --node-external-ip $K3S_MASTER\" sh -s -"
 
 
 # token

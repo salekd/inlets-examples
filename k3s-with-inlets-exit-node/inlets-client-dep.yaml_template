@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inlets-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inlets-client
+  template:
+    metadata:
+      labels:
+        app: inlets-client
+    spec:
+      containers:
+      - name: inlets-client
+        image: inlets/inlets:2.6.3
+        imagePullPolicy: Always
+        command: ["inlets"]
+        args:
+        - "client"
+        - "--remote=ws://{{INLETS_PRIVATE_DNS}}:8123"
+        - "--upstream=http://ingress-nginx-controller.default:80"
+        - "--token-from=/var/inlets/token"
+        volumeMounts:
+          - name: inlets-token-volume
+            mountPath: /var/inlets/
+      volumes:
+        - name: inlets-token-volume
+          secret:
+            secretName: inlets-token
