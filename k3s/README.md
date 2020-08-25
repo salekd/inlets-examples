@@ -1,14 +1,37 @@
 # K3s
 
-Deploy the infrastructure for the K3s cluster:
-
 ```
+# Deploy the EC2 instances for a K3s cluster.
 terraform init
 terraform plan
 terraform apply
-```
 
-Use the `k3s.sh` or `k3sup.sh` scripts to deploy the cluster.
+# Deploy the K3s 
+# ./k3.sh
+./k3sup.sh
+
+# Deploy inlets-operator.
+./arkade.sh
+
+
+# Deploy nginx as an example.
+kubectl apply -f \
+  https://raw.githubusercontent.com/inlets/inlets-operator/master/contrib/nginx-sample-deployment.yaml
+
+kubectl expose deployment nginx-1 --port=80 --type=LoadBalancer
+kubectl get svc
+
+kubectl get tunnel/nginx-1-tunnel -o yaml
+kubectl logs deploy/nginx-1-tunnel-client
+
+# When you're done, remove the tunnel by deleting the service
+kubectl delete svc/nginx-1
+
+kubectl logs deploy/inlets-operator -f
+
+
+terraform destroy
+```
 
 ```
 terraform output private_key > private.pem
@@ -34,9 +57,6 @@ sudo cat /etc/rancher/k3s/k3s.yaml
 export K3S_NODE1=`terraform output k3s_node1_public_dns`
 echo $K3S_NODE1
 ssh -i private.pem ubuntu@$K3S_NODE1
-
-
-terraform destroy
 ```
 
 https://github.com/alexellis/k3sup
