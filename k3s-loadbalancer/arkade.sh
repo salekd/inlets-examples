@@ -3,10 +3,10 @@ export KUBECONFIG=`pwd`/kubeconfig.yaml
 
 # curl -sLS https://dl.get-arkade.dev | sudo sh
 
-arkade install ingress-nginx
+arkade install ingress-nginx --wait
 
 
-arkade install cert-manager
+arkade install cert-manager --wait
 
 cat <<EOF | kubectl apply -f -
 apiVersion: cert-manager.io/v1alpha2
@@ -31,7 +31,7 @@ spec:
 EOF
 
 
-arkade install kubernetes-dashboard
+arkade install kubernetes-dashboard --wait
 
 cat <<EOF | kubectl apply -f -
 ---
