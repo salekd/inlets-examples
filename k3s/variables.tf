@@ -1,2 +1,3 @@
 variable "zone_id" {}
-variable "record_name" {}
+variable "cluster_name" {}
+variable "dns_domain_name" {}

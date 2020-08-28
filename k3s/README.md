@@ -1,4 +1,4 @@
-# K3s
+# K3s with inlets-operator
 
 ```
 # Deploy the EC2 instances for a K3s cluster.
@@ -6,7 +6,7 @@ terraform init
 terraform plan
 terraform apply
 
-# Deploy the K3s 
+# Deploy the K3s.
 # ./k3.sh
 ./k3sup.sh
 

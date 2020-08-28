@@ -18,22 +18,30 @@ ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
 # token
 export TOKEN=`ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER sudo cat /var/lib/rancher/k3s/server/node-token`
 echo $TOKEN
-
 export K3S_MASTER_PRIVATE_IP=`terraform output k3s_master_private_ip`
+echo $K3S_MASTER_PRIVATE_IP
 
 
 export K3S_NODE1=`terraform output k3s_node1_public_dns`
 echo $K3S_NODE1
+export K3S_NODE1_EXTERNAL_IP=`terraform output k3s_node1_private_ip`
+echo $K3S_NODE1_EXTERNAL_IP
 
+#ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_NODE1 \
+#  "curl -sfL http://get.k3s.io | K3S_URL=https://$K3S_MASTER_PRIVATE_IP:6443 K3S_TOKEN=$TOKEN sh -"
 ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_NODE1 \
-  "curl -sfL http://get.k3s.io | K3S_URL=https://$K3S_MASTER_PRIVATE_IP:6443 K3S_TOKEN=$TOKEN sh -"
+  "curl -sfL https://get.k3s.io | K3S_URL=https://$K3S_MASTER_PRIVATE_IP:6443 K3S_TOKEN=$TOKEN INSTALL_K3S_EXEC=\"agent --node-external-ip $K3S_NODE1_EXTERNAL_IP\" sh -s -"
 
 
 export K3S_NODE2=`terraform output k3s_node2_public_dns`
 echo $K3S_NODE2
+export K3S_NODE2_EXTERNAL_IP=`terraform output k3s_node2_private_ip`
+echo $K3S_NODE2_EXTERNAL_IP
 
+#ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_NODE2 \
+#  "curl -sfL http://get.k3s.io | K3S_URL=https://$K3S_MASTER_PRIVATE_IP:6443 K3S_TOKEN=$TOKEN sh -"
 ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_NODE2 \
-  "curl -sfL http://get.k3s.io | K3S_URL=https://$K3S_MASTER_PRIVATE_IP:6443 K3S_TOKEN=$TOKEN sh -"
+  "curl -sfL https://get.k3s.io | K3S_URL=https://$K3S_MASTER_PRIVATE_IP:6443 K3S_TOKEN=$TOKEN INSTALL_K3S_EXEC=\"agent --node-external-ip $K3S_NODE2_EXTERNAL_IP\" sh -s -"
 
 
 ssh -i private.pem -o StrictHostKeyChecking=no ubuntu@$K3S_MASTER \
