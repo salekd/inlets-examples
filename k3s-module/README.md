@@ -20,6 +20,12 @@ kubectl get pods -A
 ```
 
 ```
+./arkade.sh
+```
+
+https://dashboard.k3s-david.sda-dev-projects.nl/
+
+```
 export token=$(head -c 16 /dev/urandom | shasum | cut -d" " -f1)
 echo $token
 export token=d2da4318bbbe36d3c129107c8d52e83a3161ce83
