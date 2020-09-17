@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Wait for Minio to be ready.
+echo "Waiting for Minio to become ready."
+export POD_NAME=$(kubectl get pods -l app.kubernetes.io/instance=minio -o jsonpath='{ .items[0].metadata.name}')
+kubectl wait --for=condition=ready pod/$POD_NAME
+
+# Wait for the service, ingress, external URL to become available.
+while [ -n "$(mc config host add minio https://${minio_host} admin ${admin_password} 2>&1 > /dev/null)" ]; do
+  echo "Waiting for Minio to become accessible externally."
+  sleep 5
+done
+sleep 5
+
+
+# Create a user for the automated pipeline.
+mc admin user add minio pipeline ${pipeline_password}
+mc admin policy set minio readwrite user=pipeline
+
+# Create a public user
+mc admin user add minio public ${public_password}
+mc admin policy set minio readonly user=public
+
+mc admin user list minio

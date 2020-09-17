@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Wait for Grafana to be ready.
+echo "Waiting for Grafana to become ready."
+export POD_NAME=$(kubectl get pods -l app.kubernetes.io/instance=grafana -o jsonpath='{ .items[0].metadata.name}')
+kubectl wait --for=condition=ready pod/$POD_NAME
+
+# Wait for the service, ingress, external URL to become available.
+while [[ "$(curl -s -o /dev/null -w ''%%{http_code}'' https://${grafana_host}/api/health)" != "200" ]]; do
+  echo "Waiting for Grafana to become available."
+  sleep 5
+done
+
+
+# Create a public user.
+curl -XPOST \
+  -H "Accept: application/json" -H "Content-Type: application/json" \
+  -u "admin:${admin_password}" \
+  https://${grafana_host}/api/admin/users \
+  --data "{\"name\": \"public\", \"email\": \"public@localhost\", \"login\": \"public\", \"password\": \"${public_password}\"}" | jq .
