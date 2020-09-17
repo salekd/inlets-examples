@@ -154,3 +154,14 @@ resource "kubernetes_service" "mosquitto" {
     type = "ClusterIP"
   }
 }
+
+
+resource "kubernetes_config_map" "tcp" {
+  metadata {
+    name      = "tcp-services"
+    namespace = "ingress-nginx"
+  }
+  data = {
+    "1883": "default/mosquitto:1883"
+  }
+}
