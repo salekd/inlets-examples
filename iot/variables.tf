@@ -4,6 +4,12 @@ variable "host" {
     default = "k3s-david.sda-dev-projects.nl"
 }
 
+variable "ingress_nginx_namespace" {
+    type = string
+    description = "ingress-nginx namespace"
+    default = "default"
+}
+
 
 variable "admin_password" {
     type = string

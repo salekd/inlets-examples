@@ -159,7 +159,7 @@ resource "kubernetes_service" "mosquitto" {
 resource "kubernetes_config_map" "tcp" {
   metadata {
     name      = "tcp-services"
-    namespace = "ingress-nginx"
+    namespace = var.ingress_nginx_namespace
   }
   data = {
     "1883": "default/mosquitto:1883"
