@@ -20,6 +20,9 @@ resource "kubernetes_deployment" "ubuntu" {
   metadata {
     name = "ubuntu"
     namespace = "default"
+    labels = {
+      app = "ubuntu"
+    }
   }
 
   spec {
