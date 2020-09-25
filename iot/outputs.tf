@@ -11,3 +11,8 @@ output "public_password" {
   value = var.admin_password
   sensitive = true
 }
+
+output "test_password" {
+  value = var.test_password
+  sensitive = true
+}

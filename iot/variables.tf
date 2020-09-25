@@ -1,7 +1,7 @@
 variable "host" {
     type = string
     description = "host"
-    default = "k3s-david.sda-dev-projects.nl"
+    default = "k3s-david-iot.sda-dev-projects.nl"
 }
 
 variable "ingress_nginx_namespace" {
@@ -27,6 +27,12 @@ variable "public_password" {
     type = string
     description = "Public password"
     default = "hDmBsiC7HLXJFz"
+}
+
+variable "test_password" {
+    type = string
+    description = "Test password"
+    default = "arI5kqOrkW3K2F"
 }
 
 
@@ -92,11 +98,42 @@ variable "influxdb_limits_memory" {
 }
 
 
-variable "grafana_size" {
+variable "postgresql_size" {
     type = string
-    description = "Grafana volume size"
+    description = "PostgreSQL volume size"
     default = "1Gi"
 }
+
+variable "postgresql_requests_cpu" {
+    type = string
+    description = "PostgreSQL CPU request"
+    default = "250m"
+}
+
+variable "postgresql_requests_memory" {
+    type = string
+    description = "PostgreSQL memory request"
+    default = "512Mi"
+}
+
+variable "postgresql_limits_cpu" {
+    type = string
+    description = "PostgreSQL CPU limit"
+    default = "250m"
+}
+
+variable "postgresql_limits_memory" {
+    type = string
+    description = "PostgreSQL memory limit"
+    default = "512Mi"
+}
+
+
+# variable "grafana_size" {
+#     type = string
+#     description = "Grafana volume size"
+#     default = "1Gi"
+# }
 
 variable "grafana_requests_cpu" {
     type = string
@@ -123,8 +160,8 @@ variable "grafana_limits_memory" {
 }
 
 
-variable "ubuntu_size" {
-    type = string
-    description = "Ubuntu volume size"
-    default = "1Gi"
-}
+# variable "ubuntu_size" {
+#     type = string
+#     description = "Ubuntu volume size"
+#     default = "1Gi"
+# }

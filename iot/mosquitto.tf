@@ -1,63 +1,33 @@
 # Install Mosquitto
 
-resource "null_resource" "pwfile" {
-  provisioner "local-exec" {
-    command = <<EOT
-cat <<EOF > ${path.module}/files/pwfile
-admin:${var.admin_password}
-pipeline:${var.pipeline_password}
-public:${var.public_password}
-EOF
-mosquitto_passwd -U ${path.module}/files/pwfile
-EOT
-  }
-}
-
-
-resource "kubernetes_config_map" "mosquitto" {
+resource "kubernetes_secret" "mosquitto-conf" {
   metadata {
-    name      = "mosquitto"
+    name      = "mosquitto-conf"
     namespace = "default"
   }
 
   data = {
-    "mosquitto.conf" = <<EOF
+    "mosquitto.conf" = <<EOT
 log_dest stdout
 log_type all
 port 1883
-acl_file /etc/mosquitto/aclfile
-password_file /etc/mosquitto/pwfile
 allow_anonymous false
 sys_interval 10
 persistence false
-EOF
 
-    "aclfile" = <<EOF
-# This affects access control for clients with no username.
-topic read $SYS/#
-
-# This only affects clients with a username.
-user public
-topic read pipeline/#
-
-user pipeline
-topic read pipeline/#
-
-user admin
-topic read #
-topic read $SYS/#
-topic write #
-
-# This affects all clients.
-pattern write $SYS/broker/connection/%c/state
-EOF
-
-    "pwfile" = file("${path.module}/files/pwfile")
+auth_plugin /build/mosquitto-auth-plug/auth-plug.so
+auth_opt_backends postgres
+auth_opt_host postgresql.default.svc.cluster.local
+auth_opt_port 5432
+# auth_opt_dbname mosquitto
+auth_opt_dbname postgres
+auth_opt_user postgres
+auth_opt_pass ${var.admin_password}
+auth_opt_userquery SELECT pw FROM account WHERE username = $1 limit 1
+auth_opt_superquery SELECT COALESCE(COUNT(*),0) FROM account WHERE username = $1 AND super = 1
+auth_opt_aclquery SELECT topic FROM acls WHERE (username = $1) AND (rw & $2) > 0
+EOT
   }
-
-  depends_on = [
-    null_resource.pwfile,
-  ]
 }
 
 
@@ -83,7 +53,7 @@ resource "kubernetes_deployment" "mosquitto" {
 
       spec {
         container {
-          image = "salekd/mosquitto:1.0.0"
+          image = "salekd/mosquitto-auth:0.0.2"
           name  = "mosquitto"
 
           resources {
@@ -103,29 +73,19 @@ resource "kubernetes_deployment" "mosquitto" {
           }
 
           volume_mount {
-            name = "mosquitto-config"
-            mount_path = "/etc/mosquitto/mosquitto.conf"
-            sub_path = "mosquitto.conf"
-            read_only = "true"
-          }
-          volume_mount {
-            name = "mosquitto-config"
-            mount_path = "/etc/mosquitto/aclfile"
-            sub_path = "aclfile"
-            read_only = "true"
-          }
-          volume_mount {
-            name = "mosquitto-config"
-            mount_path = "/etc/mosquitto/pwfile"
-            sub_path = "pwfile"
-            read_only = "true"
+            name = "mosquitto-conf"
+            mount_path = "/etc/mosquitto"
           }
         }
 
         volume {
-          name = "mosquitto-config"
-          config_map {
-            name = "mosquitto"
+          name = "mosquitto-conf"
+          secret {
+            secret_name = "mosquitto-conf"
+            items {
+              key = "mosquitto.conf"
+              path = "mosquitto.conf"
+            }
           }
         }
       }
@@ -133,7 +93,8 @@ resource "kubernetes_deployment" "mosquitto" {
   }
 
   depends_on = [
-    kubernetes_config_map.mosquitto,
+    kubernetes_secret.mosquitto-conf,
+    helm_release.postgresql,
   ]
 }
 
@@ -152,16 +113,5 @@ resource "kubernetes_service" "mosquitto" {
       port = 1883
     }
     type = "ClusterIP"
-  }
-}
-
-
-resource "kubernetes_config_map" "tcp" {
-  metadata {
-    name      = "tcp-services"
-    namespace = var.ingress_nginx_namespace
-  }
-  data = {
-    "1883": "default/mosquitto:1883"
   }
 }

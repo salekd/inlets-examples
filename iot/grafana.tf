@@ -11,6 +11,27 @@ resource "local_file" "generate-grafana-bootstrap" {
   filename = "${path.module}/files/grafana-bootstrap.sh"
 }
 
+resource "kubernetes_secret" "grafana-ini" {
+  metadata {
+    name      = "grafana-ini"
+    namespace = "default"
+  }
+  data = {
+    "grafana.ini" = <<EOT
+[database]
+type = postgres
+host = postgresql.default.svc.cluster.local:5432
+name = grafana
+user = postgres
+password = ${var.admin_password}
+
+[security]
+admin_user = admin
+admin_password = ${var.admin_password}
+EOT
+  }
+}
+
 resource "kubernetes_secret" "grafana-datasources" {
   metadata {
     name      = "grafana-datasources"
@@ -38,14 +59,26 @@ resource "helm_release" "grafana" {
   version    = "3.4.0"
   namespace  = "default"
 
+#  set {
+#    name  = "admin.password"
+#    value = var.admin_password
+#  }
   set {
-    name  = "admin.password"
-    value = var.admin_password
+    name  = "config.useGrafanaIniFile"
+    value = "true"
   }
   set {
-    name  = "persistence.size"
-    value = var.grafana_size
+    name  = "config.grafanaIniSecret"
+    value = "grafana-ini"
   }
+  set {
+    name  = "persistence.enabled"
+    value = "false"
+  }
+#  set {
+#    name  = "persistence.size"
+#    value = var.grafana_size
+#  }
   set {
     name  = "metrics.enabled"
     value = "true"
@@ -127,6 +160,8 @@ resource "helm_release" "grafana" {
   depends_on = [
     null_resource.helm-check,
     local_file.generate-grafana-bootstrap,
+    kubernetes_secret.grafana-ini,
     kubernetes_secret.grafana-datasources,
+    helm_release.postgresql,
   ]
 }
