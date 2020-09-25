@@ -106,9 +106,13 @@ resource "helm_release" "influxdb" {
   set {
     name  = "initScripts.scripts.init\\.iql"
     value = <<EOT
+CREATE DATABASE "raw";
 CREATE DATABASE "iot" WITH DURATION 365d;
+
 CREATE USER "pipeline" WITH PASSWORD '${var.pipeline_password}';
+GRANT ALL ON "raw" TO "pipeline";
 GRANT ALL ON "iot" TO "pipeline";
+
 CREATE USER "public" WITH PASSWORD '${var.public_password}';
 GRANT READ ON "iot" TO "public";
 EOT

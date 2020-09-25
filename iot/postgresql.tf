@@ -71,7 +71,7 @@ CREATE TABLE acls(
 INSERT INTO acls(username\, topic\, rw)
 VALUES
   ('public'\, '#'\, 5)\,
-  ('test'\, 'pipeline/test/#'\, 7);
+  ('test'\, 'pipeline/test/+'\, 7);
 EOT
   }
 
