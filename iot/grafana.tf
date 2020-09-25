@@ -59,6 +59,15 @@ EOF
   }
 }
 
+resource "kubernetes_config_map" "grafana-dashboard" {
+  metadata {
+    name      = "grafana-dashboard"
+    namespace = "default"
+  }
+  data = {
+    "dashboard.json" = "${file("${path.module}/files/dashboard.json")}"
+  }
+}
 
 # Helm
 resource "helm_release" "grafana" {
@@ -99,6 +108,18 @@ resource "helm_release" "grafana" {
   set {
     name  = "datasources.secretName"
     value = "grafana-datasources"
+  }
+  set {
+    name  = "dashboardsProvider.enabled"
+    value = "true"
+  }
+  set {
+    name  = "dashboardsConfigMaps[0].configMapName"
+    value = "grafana-dashboard"
+  }
+  set {
+    name  = "dashboardsConfigMaps[0].fileName"
+    value = "dashboard.json"
   }
 
   # Ingress
@@ -171,6 +192,7 @@ resource "helm_release" "grafana" {
     local_file.generate-grafana-bootstrap,
     kubernetes_secret.grafana-ini,
     kubernetes_secret.grafana-datasources,
+    kubernetes_config_map.grafana-dashboard,
     helm_release.postgresql,
   ]
 }
