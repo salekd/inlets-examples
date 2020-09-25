@@ -46,6 +46,15 @@ datasources:
   url: http://prometheus-server
   access: proxy
   isDefault: true
+- name: InfluxDB
+  type: influxdb
+  url: http://influxdb.default.svc.cluster.local:8086
+  access: proxy
+  database: iot
+  user: pipeline
+  secureJsonData:
+    password: ${var.pipeline_password}
+  readOnly: true
 EOF
   }
 }
@@ -59,10 +68,10 @@ resource "helm_release" "grafana" {
   version    = "3.4.0"
   namespace  = "default"
 
-#  set {
-#    name  = "admin.password"
-#    value = var.admin_password
-#  }
+  set {
+    name  = "admin.password"
+    value = var.admin_password
+  }
   set {
     name  = "config.useGrafanaIniFile"
     value = "true"
