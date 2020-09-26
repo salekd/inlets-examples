@@ -14,13 +14,15 @@ variable "ingress_nginx_namespace" {
 variable "mqtt_port" {
     type = string
     description = "Port for accessing MQTT externally"
-    default = "1883"
+    # default = "1883"
+    default = "30000"
 }
 
 variable "postgresql_port" {
     type = string
     description = "Port for accessing PostgreSQL externally"
-    default = "5432"
+    # default = "5432"
+    default = "30001"
 }
 
 

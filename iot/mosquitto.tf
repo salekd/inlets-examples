@@ -99,6 +99,7 @@ resource "kubernetes_deployment" "mosquitto" {
 }
 
 
+# Use either ClusterIP with ingress-nginx tcp-services or NodePort.
 resource "kubernetes_service" "mosquitto" {
   metadata {
     name = "mosquitto"
@@ -111,7 +112,9 @@ resource "kubernetes_service" "mosquitto" {
     port {
       name = "mqtt"
       port = 1883
+      node_port = var.mqtt_port
     }
-    type = "ClusterIP"
+    # type = "ClusterIP"
+    type = "NodePort"
   }
 }

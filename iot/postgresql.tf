@@ -16,6 +16,15 @@ resource "helm_release" "postgresql" {
     name  = "persistence.size"
     value = var.postgresql_size
   }
+  # Use either ClusterIP with ingress-nginx tcp-services or NodePort.
+  set {
+    name  = "service.type"
+    value = "NodePort"
+  }
+  set {
+    name  = "service.nodePort"
+    value = var.postgresql_port
+  }
 
   # Requests and limits
   set {
