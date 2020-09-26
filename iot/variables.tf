@@ -4,10 +4,23 @@ variable "host" {
     default = "k3s-david-iot.sda-dev-projects.nl"
 }
 
+
 variable "ingress_nginx_namespace" {
     type = string
     description = "ingress-nginx namespace"
     default = "default"
+}
+
+variable "mqtt_port" {
+    type = string
+    description = "Port for accessing MQTT externally"
+    default = "1883"
+}
+
+variable "postgresql_port" {
+    type = string
+    description = "Port for accessing PostgreSQL externally"
+    default = "5432"
 }
 
 
@@ -34,6 +47,7 @@ variable "test_password" {
     description = "Test password"
     default = "arI5kqOrkW3K2F"
 }
+
 
 
 variable "minio_size" {
